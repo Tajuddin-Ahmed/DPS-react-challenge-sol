@@ -36,7 +36,6 @@ function Home() {
     };
     fetchUsers();
   }, []);
-  console.log("Unique Cities:", cities);
 
   if (loading) return <p>Loading users...</p>;
   if (error) return <p>{error}</p>;

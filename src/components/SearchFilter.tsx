@@ -3,6 +3,18 @@ import React, { useEffect, useState } from "react";
 function SearchFilter({ setUsers, userData, cities, AllUsers }) {
   const [inputValue, setInputValue] = useState("");
   const [filteredName, setFilteredName] = useState("");
+  const [highlightOldest, setHighlightOldest] = useState<boolean>(false);
+  const [oldestUserIds, setOldestUserIds] = useState<Set<number>>(new Set());
+
+  interface User {
+    id: number;
+    firstName: string;
+    age: number;
+    address: {
+      city: string;
+    };
+  }
+
   const onSelectCity = (city: string) => {
     const filtered = AllUsers?.filter(
       (user: any) => user.address.city === city
@@ -15,14 +27,13 @@ function SearchFilter({ setUsers, userData, cities, AllUsers }) {
       console.log(inputValue);
       const filtered = AllUsers.filter(
         (user) =>
-          user.firstName.toLowerCase().includes(filteredName) ||
-          user.lastName.toLowerCase().includes(filteredName)
+          user.firstName.toLowerCase().includes(inputValue) ||
+          user.lastName.toLowerCase().includes(inputValue)
       );
-      if (filteredName?.length > 0) {
-        setUsers(filtered);
-      } else {
+      if (filteredName === "") {
         setUsers(AllUsers);
       }
+      setUsers(filtered);
       console.log(filtered);
     }, 1000);
 
@@ -30,6 +41,38 @@ function SearchFilter({ setUsers, userData, cities, AllUsers }) {
       clearTimeout(handler);
     };
   }, [inputValue]);
+  // highlight checkbox feature
+  useEffect(() => {
+    if (highlightOldest) {
+      const oldestPerCity = new Map<string, number>(); // city -> maxAge
+      const cityUsers = new Map<string, User[]>(); // city -> list of users
+
+      AllUsers.forEach((user: User) => {
+        const city = user.address.city;
+        if (
+          !oldestPerCity.has(city) ||
+          user.age > (oldestPerCity.get(city) ?? 0)
+        ) {
+          oldestPerCity.set(city, user.age);
+        }
+        cityUsers.set(city, [...(cityUsers.get(city) || []), user]);
+      });
+
+      const oldestIds = new Set<number>();
+      cityUsers.forEach((usersInCity, city) => {
+        const maxAge = oldestPerCity.get(city);
+        usersInCity.forEach((user) => {
+          if (user.age === maxAge) {
+            oldestIds.add(user.id);
+          }
+        });
+      });
+
+      setOldestUserIds(oldestIds);
+    } else {
+      setOldestUserIds(new Set());
+    }
+  }, [highlightOldest, AllUsers]);
 
   return (
     <div className="flex flex-col gap-y-5">
@@ -74,11 +117,18 @@ function SearchFilter({ setUsers, userData, cities, AllUsers }) {
             ))}
           </ul>
         </div>
-        <input
-          type="checkbox"
-          defaultChecked
-          className="checkbox checkbox-primary"
-        />
+        <div className="flex items-center">
+          <label htmlFor="highestAge">
+            <span className="text-xs">Highlight oldest per city</span>
+          </label>
+          <input
+            id="highestAge"
+            type="checkbox"
+            checked={highlightOldest}
+            onChange={() => setHighlightOldest(!highlightOldest)}
+            className="checkbox checkbox-primary"
+          />
+        </div>
       </div>
       <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
         <table className="table">
@@ -93,7 +143,14 @@ function SearchFilter({ setUsers, userData, cities, AllUsers }) {
           <tbody>
             {/* row 1 */}
             {userData?.map((user) => (
-              <tr key={user.id}>
+              <tr
+                key={user.id}
+                className={
+                  oldestUserIds.has(user.id)
+                    ? "bg-blue-100 border-2 border-blue-500"
+                    : ""
+                }
+              >
                 <td>{user.firstName + " " + user.lastName}</td>
                 <td>{user.address.city}</td>
                 <td>{user.birthDate}</td>
