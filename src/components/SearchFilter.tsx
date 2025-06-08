@@ -21,6 +21,7 @@ function SearchFilter({ setUsers, userData, cities, AllUsers }) {
     );
     setUsers(filtered);
   };
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setFilteredName(inputValue);
@@ -41,11 +42,12 @@ function SearchFilter({ setUsers, userData, cities, AllUsers }) {
       clearTimeout(handler);
     };
   }, [inputValue]);
+
   // highlight checkbox feature
   useEffect(() => {
     if (highlightOldest) {
-      const oldestPerCity = new Map<string, number>(); // city -> maxAge
-      const cityUsers = new Map<string, User[]>(); // city -> list of users
+      const oldestPerCity = new Map<string, number>();
+      const cityUsers = new Map<string, User[]>();
 
       AllUsers.forEach((user: User) => {
         const city = user.address.city;
@@ -75,7 +77,7 @@ function SearchFilter({ setUsers, userData, cities, AllUsers }) {
   }, [highlightOldest, AllUsers]);
 
   return (
-    <div className="flex flex-col gap-y-5">
+    <div className="flex flex-col gap-y-5 p-5 border border-white bg-white">
       <div className="flex flex-row justify-center gap-x-5 items-center">
         <label className="input">
           <svg
@@ -103,12 +105,12 @@ function SearchFilter({ setUsers, userData, cities, AllUsers }) {
           />
         </label>
         <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn w-40">
+          <div tabIndex={0} className="btn w-40">
             Select City
           </div>
           <ul
             tabIndex={0}
-            className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+            className="dropdown-content menu bg-gray-100 rounded-box z-1 w-52 p-2 shadow-sm"
           >
             {cities?.map((city, index) => (
               <li onClick={() => onSelectCity(city)} key={index}>
@@ -130,11 +132,11 @@ function SearchFilter({ setUsers, userData, cities, AllUsers }) {
           />
         </div>
       </div>
-      <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-        <table className="table">
+      <div className="overflow-x-auto rounded-box border border-base-content/5 bg-base-100 max-h-screen overflow-y-auto">
+        <table className="table border border-blue-100">
           {/* head */}
           <thead>
-            <tr>
+            <tr className="border border-gray-400">
               <th>Name</th>
               <th>City</th>
               <th>Birthday</th>

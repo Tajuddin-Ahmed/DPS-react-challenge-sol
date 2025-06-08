@@ -20,9 +20,7 @@ function Home() {
     const fetchUsers = async () => {
       try {
         const response = await axios.get<User[]>("https://dummyjson.com/users");
-        const cities = response.data?.users.map(
-          (user: any) => user.address.city
-        );
+        const cities = response.data?.users.map((user) => user.address.city);
         uniqueCities = [...new Set(cities)];
         setCities(uniqueCities);
 
@@ -40,7 +38,7 @@ function Home() {
   if (loading) return <p>Loading users...</p>;
   if (error) return <p>{error}</p>;
   return (
-    <div className="mx-auto min-h-screen">
+    <div className="mx-auto min-h-screen ">
       <SearchFilter
         setUsers={setUsers}
         userData={users}
